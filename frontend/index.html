@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Stundenplan</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f2f2f2;
+        }
+        h1 {
+            color: #333;
+        }
+        select {
+            padding: 5px;
+            font-size: 16px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background: #007BFF;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Stundenplan</h1>
+
+    <label for="klasse">Klasse wählen:</label>
+    <select id="klasse" onchange="ladeStundenplan()">
+        <option value="">-- bitte wählen --</option>
+    </select>
+
+    <table id="stundenplan" style="display: none;">
+        <thead>
+            <tr>
+                <th>Tag</th>
+                <th>Stunde</th>
+                <th>Fach</th>
+                <th>Lehrer</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        async function ladeKlassen() {
+            const res = await fetch("http://127.0.0.1:8000/klassen");
+            const klassen = await res.json();
+            const select = document.getElementById("klasse");
+            klassen.forEach(k => {
+                const option = document.createElement("option");
+                option.value = k.name;
+                option.textContent = k.name;
+                select.appendChild(option);
+            });
+        }
+
+        async function ladeStundenplan() {
+            const klasse = document.getElementById("klasse").value;
+            const tabelle = document.getElementById("stundenplan");
+            const tbody = tabelle.querySelector("tbody");
+
+            if (!klasse) {
+                tabelle.style.display = "none";
+                return;
+            }
+
+            const res = await fetch(`http://127.0.0.1:8000/stundenplan?klasse=${klasse}`);
+            const daten = await res.json();
+            tbody.innerHTML = "";
+
+            daten.sort((a, b) => {
+                const tage = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"];
+                if (a.tag !== b.tag) return tage.indexOf(a.tag) - tage.indexOf(b.tag);
+                return a.stunde - b.stunde;
+            });
+
+            daten.forEach(eintrag => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${eintrag.tag}</td>
+                    <td>${eintrag.stunde}</td>
+                    <td>${eintrag.fach}</td>
+                    <td>${eintrag.lehrer}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            tabelle.style.display = "table";
+        }
+
+        ladeKlassen();
+    </script>
+</body>
+</html>
