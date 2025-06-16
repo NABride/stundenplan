@@ -33,12 +33,13 @@ def get_schueler():
     cur = conn.cursor()
     cur.execute("SELECT id, name FROM schueler")
     result = [{"id": row[0], "name": row[1]} for row in cur.fetchall()]
+    print(result)
     conn.close()
     return result
 
 
 @app.get("/stundenplan")
-def get_stundenplan(klasse: str = Query(..., description="z. B. '11A'")):
+def get_stundenplan(schueler: str = Query(..., description="z. B. 'Bernd Brot'")):
     conn = get_connection()
     cur = conn.cursor()
 
@@ -48,8 +49,9 @@ def get_stundenplan(klasse: str = Query(..., description="z. B. '11A'")):
         JOIN fach ON fach.id = stunde.fach_id
         JOIN lehrer ON lehrer.id = stunde.lehrer_id
         JOIN klasse ON klasse.id = stunde.klasse_id
-        WHERE klasse.name = ?
-    """, (klasse,))
+        JOIN schueler ON schueler.id = stunde.schueler_id
+        WHERE schueler.name = ?
+    """, (schueler,))
 
     rows = cur.fetchall()
     conn.close()

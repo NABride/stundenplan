@@ -28,6 +28,14 @@ def init_db():
     )""")
 
     cur.execute("""
+    CREATE TABLE IF NOT EXISTS schueler (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        klasse_id INTEGER,
+        FOREIGN KEY (klasse_id) REFERENCES klasse(id)                
+    )""")
+
+    cur.execute("""
     CREATE TABLE IF NOT EXISTS stunde (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         tag TEXT NOT NULL,
@@ -35,9 +43,11 @@ def init_db():
         fach_id INTEGER,
         lehrer_id INTEGER,
         klasse_id INTEGER,
+        schueler_id INTEGER,
         FOREIGN KEY (fach_id) REFERENCES fach(id),
         FOREIGN KEY (lehrer_id) REFERENCES lehrer(id),
-        FOREIGN KEY (klasse_id) REFERENCES klasse(id)
+        FOREIGN KEY (klasse_id) REFERENCES klasse(id),
+        FOREIGN KEY (schueler_id) REFERENCES schueler(id)
     )""")
 
     conn.commit()

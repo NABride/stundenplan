@@ -37,8 +37,8 @@
 <body>
     <h1>Stundenplan</h1>
 
-    <label for="klasse">Klasse wählen:</label>
-    <select id="klasse" onchange="ladeStundenplan()">
+    <label for="schueler">Schüler wählen:</label>
+    <select id="schueler" onchange="ladeStundenplan()">
         <option value="">-- bitte wählen --</option>
     </select>
 
@@ -67,17 +67,29 @@
             });
         }
 
+        async function ladeSchueler() {
+            const res = await fetch("http://127.0.0.1:8000/schueler");
+            const schueler = await res.json();
+            const select = document.getElementById("schueler");
+            schueler.forEach(s => {
+                const option = document.createElement("option");
+                option.value = s.name;
+                option.textContent = s.name;
+                select.appendChild(option);
+            });
+        }
+
         async function ladeStundenplan() {
-            const klasse = document.getElementById("klasse").value;
+            const schueler = document.getElementById("schueler").value;
             const tabelle = document.getElementById("stundenplan");
             const tbody = tabelle.querySelector("tbody");
 
-            if (!klasse) {
+            if (!schueler) {
                 tabelle.style.display = "none";
                 return;
             }
 
-            const res = await fetch(`http://127.0.0.1:8000/stundenplan?klasse=${klasse}`);
+            const res = await fetch(`http://127.0.0.1:8000/stundenplan?schueler=${schueler}`);
             const daten = await res.json();
             tbody.innerHTML = "";
 
@@ -101,7 +113,8 @@
             tabelle.style.display = "table";
         }
 
-        ladeKlassen();
+        //ladeKlassen();
+        ladeSchueler();
     </script>
 </body>
 </html>
