@@ -1,7 +1,23 @@
 from fastapi import FastAPI, Query
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+import os
 from database import get_connection
 
 app = FastAPI()
+
+# Absolute oder relative Pfade korrekt setzen
+frontend_path = os.path.abspath("../frontend")
+
+# Static-Dateien (JS, CSS usw.) verfügbar machen
+app.mount("/static", StaticFiles(directory=frontend_path), name="static")
+
+# index.html aus frontend liefern
+@app.get("/")
+def root():
+    return FileResponse(os.path.join(frontend_path, "index.html"))
+
+
 
 @app.get("/stundenplan")
 def get_stundenplan(klasse: str = Query(..., description="z. B. '11A'")):
