@@ -17,6 +17,24 @@ app.mount("/static", StaticFiles(directory=frontend_path), name="static")
 def root():
     return FileResponse(os.path.join(frontend_path, "index.html"))
 
+@app.get("/klassen")
+def get_klassen():
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id, name FROM klasse")
+    rows = cur.fetchall()
+    conn.close()
+    return [{"id": row[0], "name": row[1]} for row in rows]
+
+
+@app.get("/schueler")
+def get_schueler():
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id, name FROM schueler")
+    result = [{"id": row[0], "name": row[1]} for row in cur.fetchall()]
+    conn.close()
+    return result
 
 
 @app.get("/stundenplan")
